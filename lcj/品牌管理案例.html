@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="./lib/bootstrap-3.3.7.css">
+    <script src="./lib/vue-2.4.0.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">添加品牌</h3>
+            </div>
+            <div class="panel-body form-inline">
+                <label>
+                    Id:
+                    <input type="text" ref="idtext" v-focus class="form-control" v-model="id" @keyup.ctrl.enter="add()">
+                </label>
+                <label>
+                    Name：
+                    <input type="text" class="form-control" v-model="name"  @keyup.ctrl.enter="add()">
+                </label>
+                <input type="button" value="添加"  class="btn btn-primary" @click="add()">
+                <label>
+                    搜索名称关键字：
+                    <input type="text"  class="form-control" v-model="keywords" v-color="'red'">
+                </label>    
+            </div>  
+        </div>
+        <table  class="table table-bordered table-hover table-striped">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Ctime</th>
+                    <th>Operation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="item in search()" :key="item.name">
+                    <td>{{item.id}}</td>
+                    <td>{{item.name}}</td>
+                    <td>{{item.ctime | dateFormatter() }}</td>
+                    <td><input type="button" value="删除" @click="del(item.id)"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+<script>
+    Vue.filter("dateFormatter",function(msg,pattern){
+    var year = msg.getFullYear();
+    var month = msg.getMonth()+1;
+    var day = msg.getDate();
+
+    var hh = msg.getHours()
+    var mm = msg.getMinutes()
+    var ss = msg.getSeconds()
+
+    if(pattern == 'yyyy-mm-dd'){
+        return `${year}-${month}-${day}`
+    }
+    return `${year}-${month}-${day} ${hh}:${mm}:${ss}`
+    })
+
+    Vue.directive('focus', {
+        inserted: function (el) {
+            el.focus()
+        }
+    })
+
+    Vue.directive('color', {
+        bind: function (el,binding) {
+            el.style.color = binding.value
+        }
+    })
+    var vm = new Vue({
+        el:"#app",
+        data:{
+            id:"",
+            name:"",
+            keywords:"",
+            list:[
+                {id: 1, name:'宝马',ctime:new Date() },
+                {id: 2, name:'奔驰',ctime:new Date() }
+            ]
+        },
+        methods: {
+            add(){
+                if(this.id && this.name){
+                    var obj= {
+                        id: this.id,
+                        name: this.name,
+                        ctime: new Date()
+                    }
+                    this.list.unshift(obj)
+                    this.id = this.name = ""    
+                }
+                this.$refs.idtext.focus();
+            },
+            del(id){
+                this.list = this.list.filter((item) =>{
+                    if(item.id==id) {
+                        return false;
+                    }
+                    else{
+                        return true;
+                    }
+                })
+            },
+            search(){
+                return this.list.filter((item) =>{
+                    if (item.name.includes(this.keywords)){
+                        return true;
+                    }
+                    else{
+                        return false;
+                    }
+                })
+            }
+        }
+    })
+</script>
+</html>
